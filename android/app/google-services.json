@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "702239477352",
+    "project_id": "crewlink2025",
+    "storage_bucket": "crewlink2025.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:702239477352:android:d3791a491f761501beb5dd",
+        "android_client_info": {
+          "package_name": "com.example.crewlink"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAECQq8zlAOkZmET82uGiMHpycISdlfCAo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
