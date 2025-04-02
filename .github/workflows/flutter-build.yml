@@ -17,7 +17,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0'
+          flutter-version: '3.29.2'
           channel: 'stable'
       
       - name: Create .env file
@@ -37,6 +37,3 @@ jobs:
       
       - name: Build APK
         run: flutter build apk
-      
-      - name: Build iOS
-        run: flutter build ios --release --no-codesign
