@@ -11,19 +11,13 @@ void main() async {
   await dotenv.load(fileName: ".env");
   
   // initialize firebase
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
-
   try {
-    // Attempt initialization
+    // attempt initialization
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } on FirebaseException catch (e) {
-    if (e.code == 'duplicate-app') {
-      print('Firebase already initialized, skipping...');
-    } else {
+    if (e.code != 'duplicate-app') {
       rethrow;
     }
   }
