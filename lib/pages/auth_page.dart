@@ -1,6 +1,7 @@
 import 'package:crewlink/providers/common_providers.dart';
+import 'package:crewlink/widgets/frosted_text_field.dart';
+import 'package:crewlink/widgets/gradient_scaffold.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AuthPage extends ConsumerWidget {
@@ -8,52 +9,48 @@ class AuthPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // watch bool provider
     final isCreatingAccount = ref.watch(createAccountProvider);
 
-    return Scaffold(
+    return GradientScaffold(
       body: Center(
         child: SingleChildScrollView(
           child: Form(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(20.0),
               child: Column(
                 spacing: 16.0,
                 children: [
-                  if (isCreatingAccount)
-                    FormBuilderTextField(
-                      name: 'name',
-                      decoration: InputDecoration(
-                        labelText: 'Name',
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  FormBuilderTextField(
-                    name: 'email',
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                      border: OutlineInputBorder(),
+                  // Image.asset(
+                  //   'assets/images/logo.png',
+                  //   width: double.infinity,
+                  // ),
+                  Text(
+                    'CL',
+                    style: TextStyle(
+                      fontSize: 48.0,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  FormBuilderTextField(
-                    name: 'password',
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                      border: OutlineInputBorder(),
+                  if (isCreatingAccount)
+                    const FrostedTextField(
+                      name: 'name',
+                      label: 'Name',
                     ),
+                  const FrostedTextField(
+                    name: 'email',
+                    label: 'Email',
+                  ),
+                  const FrostedTextField(
+                    name: 'password',
+                    label: 'Password',
+                    obscureText: true,
                   ),
                   ElevatedButton(
                     onPressed: () {},
-                    child: Text(
-                      isCreatingAccount ? 'Sign up' : 'Login',
-                    ),
+                    child: Text(isCreatingAccount ? 'Sign up' : 'Login'),
                   ),
                   TextButton(
                     onPressed: () {
-                      // toggle state
                       ref.read(createAccountProvider.notifier).toggle();
                     },
                     child: Text(

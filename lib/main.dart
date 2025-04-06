@@ -9,7 +9,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // load .env
   await dotenv.load(fileName: ".env");
-  
+
   // initialize firebase
   try {
     // attempt initialization
@@ -36,9 +36,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'CrewLink',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurpleAccent,
+          brightness: Brightness.dark,
+        ),
         useMaterial3: true,
       ),
       home: const AuthPage(),
