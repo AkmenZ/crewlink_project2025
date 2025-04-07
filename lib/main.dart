@@ -1,5 +1,8 @@
 import 'package:crewlink/firebase_options.dart';
 import 'package:crewlink/pages/auth_page.dart';
+import 'package:crewlink/pages/home_page.dart';
+import 'package:crewlink/pages/loading_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -45,7 +48,22 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const AuthPage(),
+      // listen to auth state changes
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          // if credentials are loading
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const LoadingPage();
+          }
+          // if instance holds credential, navigate to home page
+          if (snapshot.hasData) {
+            return const HomePage();
+          }
+          // otherwise navigate to auth page
+          return const AuthPage();
+        },
+      ),
     );
   }
 }
