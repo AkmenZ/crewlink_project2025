@@ -43,26 +43,26 @@ class AuthPage extends ConsumerWidget {
             if (user != null && name != null) {
               await user.updateDisplayName(name);
               await _fb.currentUser?.reload(); // reload current user
-              final refreshedUser = _fb.currentUser;
-              print('display name set: ${refreshedUser?.displayName}');
             }
           }
         } on FirebaseAuthException catch (error) {
-          if (error.code == 'email-already-in-use') {
+          if (error.code == 'email-already-in-use' && context.mounted) {
             CustomSnackbar.showError(
               context,
               'This email is already in use. Please login!',
             );
-          } else if (error.code == 'invalid-credential') {
+          } else if (error.code == 'invalid-credential' && context.mounted) {
             CustomSnackbar.showError(
               context,
               'This email/password was not found!',
             );
           } else {
-            CustomSnackbar.showError(
-              context,
-              error.message ?? 'Auth error!',
-            );
+            if (context.mounted) {
+              CustomSnackbar.showError(
+                context,
+                error.message ?? 'Auth error!',
+              );
+            }
           }
         }
       }
