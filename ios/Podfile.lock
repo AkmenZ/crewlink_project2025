@@ -53,6 +53,8 @@ PODS:
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
   - GTMSessionFetcher/Core (4.4.0)
+  - location (0.0.1):
+    - Flutter
   - RecaptchaInterop (101.0.0)
   - rive_common (0.0.1):
     - Flutter
@@ -61,6 +63,7 @@ DEPENDENCIES:
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - Flutter (from `Flutter`)
+  - location (from `.symlinks/plugins/location/ios`)
   - rive_common (from `.symlinks/plugins/rive_common/ios`)
 
 SPEC REPOS:
@@ -83,6 +86,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_core/ios"
   Flutter:
     :path: Flutter
+  location:
+    :path: ".symlinks/plugins/location/ios"
   rive_common:
     :path: ".symlinks/plugins/rive_common/ios"
 
@@ -99,6 +104,7 @@ SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
   GTMSessionFetcher: 75b671f9e551e4c49153d4c4f8659ef4f559b970
+  location: d5cf8598915965547c3f36761ae9cc4f4e87d22e
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   rive_common: 4743dbfd2911c99066547a3c6454681e0fa907df
 
