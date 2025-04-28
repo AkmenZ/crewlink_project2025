@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crewlink/providers/common_providers.dart';
 import 'package:crewlink/widgets/custom_snackbar.dart';
 import 'package:crewlink/widgets/frosted_text_field.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final _fb = FirebaseAuth.instance;
+final _ff = FirebaseFirestore.instance;
 
 class AuthPage extends ConsumerWidget {
   const AuthPage({super.key});
@@ -42,7 +44,14 @@ class AuthPage extends ConsumerWidget {
             final user = userCreds.user;
             if (user != null && name != null) {
               await user.updateDisplayName(name);
-              await _fb.currentUser?.reload(); // reload current user
+              // add user to users collection
+              await _ff.collection('users').doc(user.uid).set({
+                'displayName': name,
+                'email': user.email,
+                'createdAt': FieldValue.serverTimestamp(),
+              });
+              // reload current user
+              await _fb.currentUser?.reload();
             }
           }
         } on FirebaseAuthException catch (error) {
