@@ -3,21 +3,15 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
-class FrostedTextField extends StatelessWidget {
-  const FrostedTextField({
+class FrostedDatePicker extends StatelessWidget {
+  const FrostedDatePicker({
     super.key,
     required this.name,
     required this.label,
-    this.obscureText = false,
-    this.minLines = 1,
-    this.maxLines = 1,
   });
 
   final String name;
   final String label;
-  final bool obscureText;
-  final int minLines;
-  final int maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +26,13 @@ class FrostedTextField extends StatelessWidget {
             borderRadius: BorderRadius.circular(8.0),
             border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
           ),
-          child: FormBuilderTextField(
+          child: FormBuilderDateTimePicker(
             name: name,
-            obscureText: obscureText,
+            firstDate: DateTime.now(),
+            lastDate: DateTime.now().add(const Duration(days: 365)),
             style: const TextStyle(color: Colors.white),
-            minLines: minLines,
-            maxLines: maxLines,
+            initialEntryMode: DatePickerEntryMode.calendarOnly,
+            timePickerInitialEntryMode: TimePickerEntryMode.dialOnly,
             decoration: InputDecoration(
               labelText: label,
               labelStyle: const TextStyle(color: Colors.white70),
