@@ -23,3 +23,18 @@ class BottomNavIndex extends _$BottomNavIndex {
 
   void setIndex(int newIndex) => state = newIndex;
 }
+
+// loading state
+@riverpod
+class LoadingState extends _$LoadingState {
+  @override
+  bool build() => false; // init state
+
+  void startLoading() {
+    state = true;
+  }
+
+  void stopLoading() {
+    state = false;
+  }
+}
