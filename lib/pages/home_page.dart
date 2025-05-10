@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -163,6 +164,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                     'Event group created successfully! ID: $groupId',
                   );
                 }
+
+                // open share dialog
+                SharePlus.instance.share(
+                  ShareParams(
+                    title: 'CrewLink Invitation',
+                    uri: Uri.parse('crewlink://invite/$groupId'),
+                  ),
+                );
               } catch (e) {
                 if (context.mounted) {
                   // show error toast

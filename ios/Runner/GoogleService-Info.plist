@@ -26,5 +26,7 @@
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:702239477352:ios:78b4356b65062793beb5dd</string>
+	<key>DATABASE_URL</key>
+	<string>https://crewlink2025-default-rtdb.europe-west1.firebasedatabase.app</string>
 </dict>
 </plist>
