@@ -7,6 +7,7 @@ class EventGroup {
   final String description;
   final DateTime createdAt;
   final String createdBy;
+  final String createdByName;
   final DateTime fromDateTime;
   final DateTime toDateTime;
 
@@ -17,6 +18,7 @@ class EventGroup {
     required this.description,
     required this.createdAt,
     required this.createdBy,
+    required this.createdByName,
     required this.fromDateTime,
     required this.toDateTime,
   });
@@ -27,6 +29,7 @@ class EventGroup {
     required String description,
     required String eventLocation,
     required String createdBy,
+    required String createdByName,
     required DateTime fromDateTime,
     required DateTime toDateTime,
   }) {
@@ -37,6 +40,7 @@ class EventGroup {
       description: description,
       createdAt: DateTime.now().toUtc(),
       createdBy: createdBy,
+      createdByName: createdByName,
       fromDateTime: fromDateTime,
       toDateTime: toDateTime,
     );
@@ -52,6 +56,7 @@ class EventGroup {
       description: data['description'] ?? '',
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       createdBy: data['createdBy'] ?? '',
+      createdByName: data['createdByName'] ?? '',
       fromDateTime: data['fromDateTime'] != null
           ? (data['fromDateTime'] as Timestamp).toDate()
           : DateTime.now().toUtc(),
@@ -69,6 +74,7 @@ class EventGroup {
       'description': description,
       'createdAt': Timestamp.fromDate(createdAt),
       'createdBy': createdBy,
+      'createdByName': createdByName,
       'fromDateTime': Timestamp.fromDate(fromDateTime),
       'toDateTime': Timestamp.fromDate(toDateTime),
     };

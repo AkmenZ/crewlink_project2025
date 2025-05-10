@@ -138,6 +138,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   eventLocation: formData['location'] ?? '',
                   description: formData['description'] ?? '',
                   createdBy: user!.uid,
+                  createdByName: user.displayName ?? user.email ?? 'Anonymous User',
                   fromDateTime: formData['dateTimeFrom'],
                   toDateTime: formData['dateTimeTo'],
                 );
