@@ -38,5 +38,20 @@ final bottomNavIndexProvider =
 );
 
 typedef _$BottomNavIndex = AutoDisposeNotifier<int>;
+String _$loadingStateHash() => r'98d35c64d46d0fae1f7be1167f8349b324e6a6d8';
+
+/// See also [LoadingState].
+@ProviderFor(LoadingState)
+final loadingStateProvider =
+    AutoDisposeNotifierProvider<LoadingState, bool>.internal(
+  LoadingState.new,
+  name: r'loadingStateProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$loadingStateHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$LoadingState = AutoDisposeNotifier<bool>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

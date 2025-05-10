@@ -1,15 +1,22 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crewlink/models/advert.dart';
+import 'package:crewlink/models/event_group.dart';
 import 'package:crewlink/providers/advert_data_provider.dart';
+import 'package:crewlink/providers/common_providers.dart';
+import 'package:crewlink/services/event_group_service.dart';
 import 'package:crewlink/widgets/advert_card.dart';
+import 'package:crewlink/widgets/custom_snackbar.dart';
 import 'package:crewlink/widgets/frosted_date_picker.dart';
 import 'package:crewlink/widgets/frosted_text_field.dart';
 import 'package:crewlink/widgets/gradient_scaffold.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -20,6 +27,7 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  final _formKey = GlobalKey<FormBuilderState>();
   late final PageController _pageController;
   Timer? _timer;
 
@@ -76,6 +84,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           ],
         ),
         body: FormBuilder(
+          key: _formKey,
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -96,8 +105,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     ),
                     Text('-'),
                     Expanded(
-                      child: FrostedDatePicker(
-                          name: 'dateTimeTo', label: 'To'),
+                      child: FrostedDatePicker(name: 'dateTimeTo', label: 'To'),
                     ),
                   ],
                 ),
@@ -115,13 +123,73 @@ class _HomePageState extends ConsumerState<HomePage> {
         floatingActionButton: FloatingActionButton.extended(
           icon: const Icon(Icons.add),
           label: Text('Create Event Group'),
-          onPressed: () {},
+          onPressed: () async {
+            // set loading state
+            ref.read(loadingStateProvider.notifier).startLoading();
+
+            if (_formKey.currentState?.saveAndValidate() ?? false) {
+              final formData = _formKey.currentState!.value;
+              final user = FirebaseAuth.instance.currentUser;
+
+              try {
+                // Create EventGroup object
+                final eventGroup = EventGroup.create(
+                  title: formData['title'] ?? '',
+                  eventLocation: formData['location'] ?? '',
+                  description: formData['description'] ?? '',
+                  createdBy: user!.uid,
+                  fromDateTime: formData['dateTimeFrom'],
+                  toDateTime: formData['dateTimeTo'],
+                );
+
+                // initial location
+                final userLocation = GeoPoint(0.0, 0.0);
+
+                // Use the service to create the group and add the first member
+                final eventGroupService = EventGroupService();
+                final groupId = await eventGroupService.createEventGroup(
+                  eventGroup: eventGroup,
+                  currentUserId: user.uid,
+                  currentUserName: user.displayName ?? user.email ?? 'Anonymous User',
+                  currentUserLocation: userLocation,
+                );
+
+                if (context.mounted) {
+                  // close the form and go back
+                  Navigator.of(context).pop();
+
+                  // show success toast
+                  CustomSnackbar.showSuccess(
+                    context,
+                    'Event group created successfully! ID: $groupId',
+                  );
+                }
+
+                // open share dialog
+                SharePlus.instance.share(
+                  ShareParams(
+                    title: 'CrewLink Invitation',
+                    uri: Uri.parse('crewlink://invite/$groupId'),
+                  ),
+                );
+              } catch (e) {
+                if (context.mounted) {
+                  // show error toast
+                  CustomSnackbar.showError(
+                    context,
+                    'Error creating event group: ${e.toString()}',
+                  );
+                }
+              } finally {
+                // stop loading state
+                ref.read(loadingStateProvider.notifier).stopLoading();
+              }
+            }
+          },
         ),
       ),
     );
   }
-
-  // TODO handle submit
 
   @override
   Widget build(BuildContext context) {

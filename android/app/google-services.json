@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "702239477352",
+    "firebase_url": "https://crewlink2025-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "crewlink2025",
     "storage_bucket": "crewlink2025.firebasestorage.app"
   },

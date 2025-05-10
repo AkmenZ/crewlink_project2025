@@ -29,9 +29,9 @@ class RadarPage extends ConsumerWidget {
               ],
             );
           },
-          // loading state
+          // loading state (display spinner)
           loading: () => const CircularProgressIndicator(),
-          // error state
+          // error state (display error message)
           error: (error, stack) => Text('Error: $error'),
         ),
       ),

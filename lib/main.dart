@@ -1,5 +1,6 @@
 import 'package:crewlink/firebase_options.dart';
 import 'package:crewlink/router.dart';
+import 'package:crewlink/widgets/loading_overlay.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -45,7 +46,15 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
+        progressIndicatorTheme: ProgressIndicatorThemeData(
+          color: Colors.deepPurpleAccent,
+          circularTrackColor: Theme.of(context).colorScheme.secondaryContainer,
+        ),
       ),
+      builder: (context, child) {
+        // wrapps all pages with loading overlay
+        return LoadingOverlay(child: child ?? const SizedBox.shrink());
+      },
     );
   }
 }
