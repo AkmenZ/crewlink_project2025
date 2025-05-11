@@ -48,6 +48,7 @@ class AuthPage extends ConsumerWidget {
               await _ff.collection('users').doc(user.uid).set({
                 'displayName': name,
                 'email': user.email,
+                'memberOfEventGroups': [],
                 'createdAt': FieldValue.serverTimestamp(),
               });
               // reload current user

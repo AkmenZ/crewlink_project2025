@@ -6,7 +6,7 @@ part of 'event_group_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$getEventGroupByIdHash() => r'438160d8d4912560422f436104e79931e0ec13eb';
+String _$getEventGroupByIdHash() => r'caebf1c6e8739e37d1467abd7f949df62de542a9';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -156,6 +156,142 @@ class _GetEventGroupByIdProviderElement
 
   @override
   String get groupId => (origin as GetEventGroupByIdProvider).groupId;
+}
+
+String _$getEventGroupsForMemberHash() =>
+    r'677f4194083fc1fb6a987b65adf190cd64a61274';
+
+/// See also [getEventGroupsForMember].
+@ProviderFor(getEventGroupsForMember)
+const getEventGroupsForMemberProvider = GetEventGroupsForMemberFamily();
+
+/// See also [getEventGroupsForMember].
+class GetEventGroupsForMemberFamily
+    extends Family<AsyncValue<List<EventGroup>>> {
+  /// See also [getEventGroupsForMember].
+  const GetEventGroupsForMemberFamily();
+
+  /// See also [getEventGroupsForMember].
+  GetEventGroupsForMemberProvider call(
+    String userId,
+  ) {
+    return GetEventGroupsForMemberProvider(
+      userId,
+    );
+  }
+
+  @override
+  GetEventGroupsForMemberProvider getProviderOverride(
+    covariant GetEventGroupsForMemberProvider provider,
+  ) {
+    return call(
+      provider.userId,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'getEventGroupsForMemberProvider';
+}
+
+/// See also [getEventGroupsForMember].
+class GetEventGroupsForMemberProvider
+    extends AutoDisposeFutureProvider<List<EventGroup>> {
+  /// See also [getEventGroupsForMember].
+  GetEventGroupsForMemberProvider(
+    String userId,
+  ) : this._internal(
+          (ref) => getEventGroupsForMember(
+            ref as GetEventGroupsForMemberRef,
+            userId,
+          ),
+          from: getEventGroupsForMemberProvider,
+          name: r'getEventGroupsForMemberProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$getEventGroupsForMemberHash,
+          dependencies: GetEventGroupsForMemberFamily._dependencies,
+          allTransitiveDependencies:
+              GetEventGroupsForMemberFamily._allTransitiveDependencies,
+          userId: userId,
+        );
+
+  GetEventGroupsForMemberProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.userId,
+  }) : super.internal();
+
+  final String userId;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<EventGroup>> Function(GetEventGroupsForMemberRef provider)
+        create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: GetEventGroupsForMemberProvider._internal(
+        (ref) => create(ref as GetEventGroupsForMemberRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        userId: userId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<EventGroup>> createElement() {
+    return _GetEventGroupsForMemberProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GetEventGroupsForMemberProvider && other.userId == userId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, userId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin GetEventGroupsForMemberRef
+    on AutoDisposeFutureProviderRef<List<EventGroup>> {
+  /// The parameter `userId` of this provider.
+  String get userId;
+}
+
+class _GetEventGroupsForMemberProviderElement
+    extends AutoDisposeFutureProviderElement<List<EventGroup>>
+    with GetEventGroupsForMemberRef {
+  _GetEventGroupsForMemberProviderElement(super.provider);
+
+  @override
+  String get userId => (origin as GetEventGroupsForMemberProvider).userId;
 }
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
