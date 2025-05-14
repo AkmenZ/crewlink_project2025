@@ -85,6 +85,23 @@ class EventGroupService {
     }
   }
 
+  // get event group members
+  Future<List<EventGroupMember>> getEventGroupMembers(String groupId) async {
+    try {
+      final membersSnapshot = await _firestore
+          .collection('eventGroups')
+          .doc(groupId)
+          .collection('members')
+          .get();
+
+      return membersSnapshot.docs
+          .map((doc) => EventGroupMember.fromFirestore(doc))
+          .toList();
+    } catch (error) {
+      return [];
+    }
+  }
+
   // add member to a group
   Future<bool> addMemberToGroup({
     required String groupId,
@@ -138,6 +155,62 @@ class EventGroupService {
       return true;
     } catch (error) {
       return false;
+    }
+  }
+
+  // stream real-time active event group member data
+  Stream<List<EventGroupMember>> streamActiveEventGroupMembers(
+      String userId) async* {
+    try {
+      final now = DateTime.now().toUtc();
+
+      // fetch user document
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+
+      // return empty list if user does not exist
+      if (!userDoc.exists) {
+        yield [];
+        return;
+      }
+
+      // get the list of event group ids the user is a member of
+      final memberOfEventGroups =
+          List<String>.from(userDoc.data()?['memberOfEventGroups'] ?? []);
+
+      // fetch details for each event group and find the active one
+      EventGroup? activeEventGroup;
+      for (final groupId in memberOfEventGroups) {
+        final groupDoc =
+            await _firestore.collection('eventGroups').doc(groupId).get();
+
+        if (groupDoc.exists) {
+          final eventGroup = EventGroup.fromFirestore(groupDoc);
+
+          if (eventGroup.fromDateTime.isBefore(now) &&
+              eventGroup.toDateTime.isAfter(now)) {
+            activeEventGroup = eventGroup;
+            break; // breaks out if active group is found
+          }
+        }
+      }
+
+      // return empty list if no active event group is found
+      if (activeEventGroup == null) {
+        yield [];
+        return;
+      }
+
+      // stream members of the active event group in realtime
+      yield* _firestore
+          .collection('eventGroups')
+          .doc(activeEventGroup.id)
+          .collection('members')
+          .snapshots()
+          .map((snapshot) => snapshot.docs
+              .map((doc) => EventGroupMember.fromFirestore(doc))
+              .toList());
+    } catch (e) {
+      yield [];
     }
   }
 }

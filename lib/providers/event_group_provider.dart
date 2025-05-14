@@ -1,4 +1,5 @@
 import 'package:crewlink/models/event_group.dart';
+import 'package:crewlink/models/event_group_member.dart';
 import 'package:crewlink/services/event_group_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -19,4 +20,23 @@ Future<EventGroup?> getEventGroupById(Ref ref, String groupId) async {
 Future<List<EventGroup>> getEventGroupsForMember(Ref ref, String userId) async {
   final eventGroups = await _service.getEventGroupsForMember(userId);
   return eventGroups;
+}
+
+// get event group members
+@riverpod
+Future<List<EventGroupMember>> getEventGroupMembers(
+  Ref ref,
+  String groupId,
+) async {
+  final members = await _service.getEventGroupMembers(groupId);
+  return members;
+}
+
+// stream active event group members
+@riverpod
+Stream<List<EventGroupMember>> eventGroupMembersStream(
+  Ref ref,
+  String userId,
+) {
+  return _service.streamActiveEventGroupMembers(userId);
 }
