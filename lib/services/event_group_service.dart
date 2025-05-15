@@ -158,8 +158,8 @@ class EventGroupService {
     }
   }
 
-  // stream real-time active event group member data
-  Stream<List<EventGroupMember>> streamActiveEventGroupMembers(
+  // stream real-time active event group member data and group id
+  Stream<Map<String, dynamic>> streamActiveEventGroupMembersWithGroupId(
       String userId) async* {
     try {
       final now = DateTime.now().toUtc();
@@ -169,7 +169,7 @@ class EventGroupService {
 
       // return empty list if user does not exist
       if (!userDoc.exists) {
-        yield [];
+        yield {'groupId': null, 'members': []};
         return;
       }
 
@@ -178,7 +178,7 @@ class EventGroupService {
           List<String>.from(userDoc.data()?['memberOfEventGroups'] ?? []);
 
       // fetch details for each event group and find the active one
-      EventGroup? activeEventGroup;
+      String? activeGroupId;
       for (final groupId in memberOfEventGroups) {
         final groupDoc =
             await _firestore.collection('eventGroups').doc(groupId).get();
@@ -188,29 +188,53 @@ class EventGroupService {
 
           if (eventGroup.fromDateTime.isBefore(now) &&
               eventGroup.toDateTime.isAfter(now)) {
-            activeEventGroup = eventGroup;
-            break; // breaks out if active group is found
+            activeGroupId = groupId;
+            break; // break out if active group is found
           }
         }
       }
 
       // return empty list if no active event group is found
-      if (activeEventGroup == null) {
-        yield [];
+      if (activeGroupId == null) {
+        yield {'groupId': null, 'members': []};
         return;
       }
 
-      // stream members of the active event group in realtime
+      // stream members of the active event group in realtime along with the groupId
       yield* _firestore
           .collection('eventGroups')
-          .doc(activeEventGroup.id)
+          .doc(activeGroupId)
           .collection('members')
           .snapshots()
-          .map((snapshot) => snapshot.docs
-              .map((doc) => EventGroupMember.fromFirestore(doc))
-              .toList());
+          .map((snapshot) => {
+                'groupId': activeGroupId,
+                'members': snapshot.docs
+                    .map((doc) => EventGroupMember.fromFirestore(doc))
+                    .toList(),
+              });
     } catch (e) {
-      yield [];
+      yield {'groupId': null, 'members': []};
+    }
+  }
+
+  // update meber location
+  Future<void> updateMemberLocation({
+    required String groupId,
+    required String userId,
+    required GeoPoint location,
+  }) async {
+    try {
+      final memberRef = _firestore
+          .collection('eventGroups')
+          .doc(groupId)
+          .collection('members')
+          .doc(userId);
+
+      await memberRef.update({
+        'location': location,
+      });
+    } catch (error) {
+      throw Exception('Failed to update member location: $error');
     }
   }
 }

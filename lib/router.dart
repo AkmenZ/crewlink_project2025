@@ -30,7 +30,7 @@ final router = GoRouter(
       final rebuiltPath = newPath + (uri.hasQuery ? '?${uri.query}' : '');
       // return the rebuilt path
       return rebuiltPath;
-    }
+    } 
 
     // checks if user is logged in
     final isLoggedIn = FirebaseAuth.instance.currentUser != null;

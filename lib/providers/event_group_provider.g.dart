@@ -430,31 +430,32 @@ class _GetEventGroupMembersProviderElement
   String get groupId => (origin as GetEventGroupMembersProvider).groupId;
 }
 
-String _$eventGroupMembersStreamHash() =>
-    r'fc18c87fa1b7f7d8f1d792c6a0669cbc2ff45e60';
+String _$eventGroupMembersWithGroupIdStreamHash() =>
+    r'5c160c8e77e975a38505de943cd6e44ac39aad06';
 
-/// See also [eventGroupMembersStream].
-@ProviderFor(eventGroupMembersStream)
-const eventGroupMembersStreamProvider = EventGroupMembersStreamFamily();
+/// See also [eventGroupMembersWithGroupIdStream].
+@ProviderFor(eventGroupMembersWithGroupIdStream)
+const eventGroupMembersWithGroupIdStreamProvider =
+    EventGroupMembersWithGroupIdStreamFamily();
 
-/// See also [eventGroupMembersStream].
-class EventGroupMembersStreamFamily
-    extends Family<AsyncValue<List<EventGroupMember>>> {
-  /// See also [eventGroupMembersStream].
-  const EventGroupMembersStreamFamily();
+/// See also [eventGroupMembersWithGroupIdStream].
+class EventGroupMembersWithGroupIdStreamFamily
+    extends Family<AsyncValue<Map<String, dynamic>>> {
+  /// See also [eventGroupMembersWithGroupIdStream].
+  const EventGroupMembersWithGroupIdStreamFamily();
 
-  /// See also [eventGroupMembersStream].
-  EventGroupMembersStreamProvider call(
+  /// See also [eventGroupMembersWithGroupIdStream].
+  EventGroupMembersWithGroupIdStreamProvider call(
     String userId,
   ) {
-    return EventGroupMembersStreamProvider(
+    return EventGroupMembersWithGroupIdStreamProvider(
       userId,
     );
   }
 
   @override
-  EventGroupMembersStreamProvider getProviderOverride(
-    covariant EventGroupMembersStreamProvider provider,
+  EventGroupMembersWithGroupIdStreamProvider getProviderOverride(
+    covariant EventGroupMembersWithGroupIdStreamProvider provider,
   ) {
     return call(
       provider.userId,
@@ -473,33 +474,33 @@ class EventGroupMembersStreamFamily
       _allTransitiveDependencies;
 
   @override
-  String? get name => r'eventGroupMembersStreamProvider';
+  String? get name => r'eventGroupMembersWithGroupIdStreamProvider';
 }
 
-/// See also [eventGroupMembersStream].
-class EventGroupMembersStreamProvider
-    extends AutoDisposeStreamProvider<List<EventGroupMember>> {
-  /// See also [eventGroupMembersStream].
-  EventGroupMembersStreamProvider(
+/// See also [eventGroupMembersWithGroupIdStream].
+class EventGroupMembersWithGroupIdStreamProvider
+    extends AutoDisposeStreamProvider<Map<String, dynamic>> {
+  /// See also [eventGroupMembersWithGroupIdStream].
+  EventGroupMembersWithGroupIdStreamProvider(
     String userId,
   ) : this._internal(
-          (ref) => eventGroupMembersStream(
-            ref as EventGroupMembersStreamRef,
+          (ref) => eventGroupMembersWithGroupIdStream(
+            ref as EventGroupMembersWithGroupIdStreamRef,
             userId,
           ),
-          from: eventGroupMembersStreamProvider,
-          name: r'eventGroupMembersStreamProvider',
+          from: eventGroupMembersWithGroupIdStreamProvider,
+          name: r'eventGroupMembersWithGroupIdStreamProvider',
           debugGetCreateSourceHash:
               const bool.fromEnvironment('dart.vm.product')
                   ? null
-                  : _$eventGroupMembersStreamHash,
-          dependencies: EventGroupMembersStreamFamily._dependencies,
-          allTransitiveDependencies:
-              EventGroupMembersStreamFamily._allTransitiveDependencies,
+                  : _$eventGroupMembersWithGroupIdStreamHash,
+          dependencies: EventGroupMembersWithGroupIdStreamFamily._dependencies,
+          allTransitiveDependencies: EventGroupMembersWithGroupIdStreamFamily
+              ._allTransitiveDependencies,
           userId: userId,
         );
 
-  EventGroupMembersStreamProvider._internal(
+  EventGroupMembersWithGroupIdStreamProvider._internal(
     super._createNotifier, {
     required super.name,
     required super.dependencies,
@@ -513,13 +514,14 @@ class EventGroupMembersStreamProvider
 
   @override
   Override overrideWith(
-    Stream<List<EventGroupMember>> Function(EventGroupMembersStreamRef provider)
+    Stream<Map<String, dynamic>> Function(
+            EventGroupMembersWithGroupIdStreamRef provider)
         create,
   ) {
     return ProviderOverride(
       origin: this,
-      override: EventGroupMembersStreamProvider._internal(
-        (ref) => create(ref as EventGroupMembersStreamRef),
+      override: EventGroupMembersWithGroupIdStreamProvider._internal(
+        (ref) => create(ref as EventGroupMembersWithGroupIdStreamRef),
         from: from,
         name: null,
         dependencies: null,
@@ -531,13 +533,14 @@ class EventGroupMembersStreamProvider
   }
 
   @override
-  AutoDisposeStreamProviderElement<List<EventGroupMember>> createElement() {
-    return _EventGroupMembersStreamProviderElement(this);
+  AutoDisposeStreamProviderElement<Map<String, dynamic>> createElement() {
+    return _EventGroupMembersWithGroupIdStreamProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is EventGroupMembersStreamProvider && other.userId == userId;
+    return other is EventGroupMembersWithGroupIdStreamProvider &&
+        other.userId == userId;
   }
 
   @override
@@ -551,19 +554,20 @@ class EventGroupMembersStreamProvider
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin EventGroupMembersStreamRef
-    on AutoDisposeStreamProviderRef<List<EventGroupMember>> {
+mixin EventGroupMembersWithGroupIdStreamRef
+    on AutoDisposeStreamProviderRef<Map<String, dynamic>> {
   /// The parameter `userId` of this provider.
   String get userId;
 }
 
-class _EventGroupMembersStreamProviderElement
-    extends AutoDisposeStreamProviderElement<List<EventGroupMember>>
-    with EventGroupMembersStreamRef {
-  _EventGroupMembersStreamProviderElement(super.provider);
+class _EventGroupMembersWithGroupIdStreamProviderElement
+    extends AutoDisposeStreamProviderElement<Map<String, dynamic>>
+    with EventGroupMembersWithGroupIdStreamRef {
+  _EventGroupMembersWithGroupIdStreamProviderElement(super.provider);
 
   @override
-  String get userId => (origin as EventGroupMembersStreamProvider).userId;
+  String get userId =>
+      (origin as EventGroupMembersWithGroupIdStreamProvider).userId;
 }
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

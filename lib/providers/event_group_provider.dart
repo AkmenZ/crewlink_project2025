@@ -32,11 +32,11 @@ Future<List<EventGroupMember>> getEventGroupMembers(
   return members;
 }
 
-// stream active event group members
+// stream active event group members and group id
 @riverpod
-Stream<List<EventGroupMember>> eventGroupMembersStream(
+Stream<Map<String, dynamic>> eventGroupMembersWithGroupIdStream(
   Ref ref,
   String userId,
 ) {
-  return _service.streamActiveEventGroupMembers(userId);
+  return _service.streamActiveEventGroupMembersWithGroupId(userId);
 }

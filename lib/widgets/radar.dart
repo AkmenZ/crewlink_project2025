@@ -1,12 +1,16 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crewlink/models/event_group_member.dart';
 import 'package:crewlink/providers/event_group_provider.dart';
+import 'package:crewlink/providers/location_provider.dart';
+import 'package:crewlink/services/event_group_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Radar extends ConsumerWidget {
+class Radar extends ConsumerStatefulWidget {
   const Radar({
     super.key,
     required this.userId,
@@ -15,55 +19,279 @@ class Radar extends ConsumerWidget {
   final String userId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<Radar> createState() => _RadarState();
+}
+
+class _RadarState extends ConsumerState<Radar> {
+  GeoPoint? _lastUpdatedLocation;
+  final _service = EventGroupService();
+  double _heading = 0.0; // initial facing north
+  Timer? _timer; // timer for periodic updates
+
+  // colors list
+  final List<Color> _availableColors = [
+    Colors.red,
+    Colors.blue,
+    Colors.orange,
+    Colors.teal,
+    Colors.purple,
+    Colors.yellow,
+    Colors.indigo,
+    Colors.pinkAccent,
+  ];
+  Map<String, Color> _memberColors = {}; // map to store member colors
+  Set<String> _checkedMembers = {}; // checked members
+  // flag to check if memebers are initialized
+  bool _isMembersInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // listen to compass updates
+    FlutterCompass.events?.listen((event) {
+      setState(() {
+        _heading = event.heading ?? 0.0; // update the heading
+      });
+    });
+
+    // start timer to update location
+    _startLocationUpdateTimer();
+  }
+
+  @override
+  void dispose() {
+    // disposes timer
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  // method to assign member colors and init checked members set
+  void _assignMembers(List<EventGroupMember> members) {
+    _memberColors = {};
+    _checkedMembers = {};
+    for (int i = 0; i < members.length; i++) {
+      final member = members[i];
+      // assign color to each member
+      _memberColors[member.userId] =
+          _availableColors[i % _availableColors.length];
+      // add member to checked members
+      _checkedMembers.add(member.userId);
+    }
+  }
+
+  // logic that decides if location should be updated
+  bool _shouldUpdateLocation(GeoPoint currentLocation) {
+    // if last locationn is null, update
+    if (_lastUpdatedLocation == null) {
+      return true;
+    }
+
+    // call the method to calculate distance
+    final distance = _calculateDistance(
+      _lastUpdatedLocation!.latitude,
+      _lastUpdatedLocation!.longitude,
+      currentLocation.latitude,
+      currentLocation.longitude,
+    );
+
+    // check if distance is more than 2 meters
+    return distance > 2;
+  }
+
+  /// updates the members location
+  Future<void> _updateMemberLocation(String groupId, GeoPoint location) async {
+    try {
+      await _service.updateMemberLocation(
+        groupId: groupId,
+        userId: widget.userId,
+        location: location,
+      );
+    } catch (error) {
+      throw Exception('Failed to update location: $error');
+    }
+  }
+
+  // calculate the meter distance between two points
+  // haversine formula
+  // https://www.movable-type.co.uk/scripts/latlong.html
+  double _calculateDistance(
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
+    const earthRadius = 6371000; // earths raduis
+    final dLat = _degreesToRadians(lat2 - lat1);
+    final dLon = _degreesToRadians(lon2 - lon1);
+
+    final a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(_degreesToRadians(lat1)) *
+            cos(_degreesToRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return earthRadius * c;
+  }
+
+  // converts degrees to radians
+  double _degreesToRadians(double degrees) {
+    return degrees * pi / 180;
+  }
+
+  // start the timer to update location every 2 seconds
+  void _startLocationUpdateTimer() {
+    // run every 2 seconds
+    _timer = Timer.periodic(const Duration(seconds: 2), (_) async {
+      // read latest location data
+      final locationAsyncValue = ref.read(locationStreamProvider);
+
+      // skip if no data
+      locationAsyncValue.whenData((locationData) {
+        if (locationData.latitude == null || locationData.longitude == null) {
+          return;
+        }
+
+        final currentLocation = GeoPoint(
+          locationData.latitude!,
+          locationData.longitude!,
+        );
+
+        // read active event group and members
+        final membersStream =
+            ref.read(eventGroupMembersWithGroupIdStreamProvider(widget.userId));
+
+        membersStream.whenData((data) {
+          final groupId = data['groupId'];
+
+          if (groupId != null) {
+            // check if should be updated
+            if (_shouldUpdateLocation(currentLocation)) {
+              // update member location
+              _updateMemberLocation(groupId, currentLocation);
+              // update last location
+              _lastUpdatedLocation = currentLocation;
+            }
+          }
+        });
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // stream member data from active event group
-    final membersStream = ref.watch(eventGroupMembersStreamProvider(userId));
+    final membersStream =
+        ref.watch(eventGroupMembersWithGroupIdStreamProvider(widget.userId));
+    // watch location stream provider
+    final locationAsyncValue = ref.watch(locationStreamProvider);
 
     return membersStream.when(
-      data: (members) {
-        if (members.isEmpty) {
-          return const Center(child: Text('There is no active event at the moment!'));
+      data: (data) {
+        final groupId = data['groupId'];
+        final members = data['members'] as List<EventGroupMember>;
+
+        if (groupId == null || members.isEmpty) {
+          return const Center(
+              child: Text('There is no active event at the moment!'));
         }
+
+        // initialize members list once to prevent from rebuilding
+        if (!_isMembersInitialized) {
+          _assignMembers(members);
+          _isMembersInitialized = true;
+        }
+
         // find current user in the list of members
         final userMember = members.firstWhere(
-          (member) => member.userId == userId,
+          (member) => member.userId == widget.userId,
           orElse: () => throw Exception('User not found among the members'),
         );
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // radar section
-            SizedBox(
-              height: 300,
-              child: CustomPaint(
-                size: const Size(300, 300), // size 
-                painter: RadarPainter(
-                  userId: userId,
-                  userLocation: userMember.location,
-                  members: members
-                      .where((member) => member.userId != userId)
-                      .toList(),
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            // list of member names
-            Expanded(
-              child: members.isEmpty
-                  ? const Center(child: Text('No members found'))
-                  : ListView.builder(
-                      itemCount: members.length,
-                      itemBuilder: (context, index) {
-                        final member = members[index];
-                        return ListTile(
-                          title: Text(member.name),
-                        );
-                      },
+        // members list without the current user
+        final filteredMembers =
+            members.where((member) => member.userId != widget.userId).toList();
+
+        return locationAsyncValue.when(
+          data: (locationData) {
+            final lat = locationData.latitude?.toStringAsFixed(6) ?? 'Unknown';
+            final lon = locationData.longitude?.toStringAsFixed(6) ?? 'Unknown';
+
+            return Column(
+              children: [
+                // radar section
+                SizedBox(
+                  height: 300,
+                  child: CustomPaint(
+                    size: const Size(300, 300), // size
+                    painter: RadarPainter(
+                      userId: widget.userId,
+                      userLocation: userMember.location,
+                      // show only checked members
+                      members: filteredMembers
+                          .where((member) =>
+                              _checkedMembers.contains(member.userId))
+                          .toList(),
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      heading: _heading,
+                      memberColors: _memberColors,
                     ),
-            ),
-          ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // user location
+                Text(
+                  'My Location',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                Text('Lat: $lat, Lon: $lon'),
+                const SizedBox(height: 20),
+                // list of member names
+                Expanded(
+                  child: members.isEmpty
+                      ? const Center(child: Text('No members found!'))
+                      : ListView.builder(
+                          itemCount: filteredMembers.length,
+                          itemBuilder: (context, index) {
+                            final member = filteredMembers[index];
+                            final color =
+                                _memberColors[member.userId] ?? Colors.grey;
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10.0),
+                              child: ListTile(
+                                title: Text(member.name),
+                                // members assigned color
+                                leading: CircleAvatar(
+                                  backgroundColor: color,
+                                  radius: 10,
+                                ),
+                                // checkbox to toggle member visibility
+                                trailing: Checkbox(
+                                  value:
+                                      _checkedMembers.contains(member.userId),
+                                  onChanged: (bool? isChecked) {
+                                    setState(() {
+                                      if (isChecked == true) {
+                                        _checkedMembers.add(member.userId);
+                                      } else {
+                                        _checkedMembers.remove(member.userId);
+                                      }
+                                    });
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Text('Error loading location: $error'),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -79,6 +307,8 @@ class RadarPainter extends CustomPainter {
   final List<EventGroupMember> members;
   final double precision; // in meters
   final Color backgroundColor;
+  final double heading;
+  final Map<String, Color> memberColors;
 
   RadarPainter({
     required this.userId,
@@ -86,6 +316,8 @@ class RadarPainter extends CustomPainter {
     required this.members,
     this.precision = 10,
     required this.backgroundColor,
+    this.heading = 0.0, // default setting to north
+    required this.memberColors,
   });
 
   @override
@@ -123,6 +355,36 @@ class RadarPainter extends CustomPainter {
       radarPaint,
     );
 
+    canvas.save(); // Save the canvas state
+    canvas.translate(center.dx, center.dy); // Translate to the center
+    canvas.rotate(-heading * pi / 180); // Rotate the canvas based on heading
+    canvas.translate(-center.dx, -center.dy); // Translate back
+
+    // drawing member dots
+    final memberDotOffsets = <Offset, String>{};
+    for (final member in members) {
+      final offset = _calculateRelativeOffset(
+        userLocation,
+        member.location,
+        center,
+        radius,
+      );
+
+      if (offset != null) {
+        // Draw member dots
+        final memberPaint = Paint()
+          ..color = memberColors[member.userId] ?? Colors.grey
+          ..style = PaintingStyle.fill;
+
+        canvas.drawCircle(offset, 6, memberPaint);
+
+        // Save the member's position and name for later (outside rotation)
+        memberDotOffsets[offset] = member.name;
+      }
+    }
+
+    canvas.restore(); // restore the canvas state
+
     // drawing a triangle icon that represents current user
     final trianglePaint = Paint()
       ..color = Colors.amber
@@ -135,38 +397,6 @@ class RadarPainter extends CustomPainter {
     path.close(); // close path
 
     canvas.drawPath(path, trianglePaint);
-
-    // adds members to radar
-    for (final member in members) {
-      final offset = _calculateRelativeOffset(
-        userLocation,
-        member.location,
-        center,
-        radius,
-      );
-
-      if (offset != null) {
-        // drawing member dots
-        final memberPaint = Paint()
-          ..color = Colors.red
-          ..style = PaintingStyle.fill;
-
-        canvas.drawCircle(offset, 6, memberPaint);
-
-        // draws name on top of the dot
-        final textPainter = TextPainter(
-          text: TextSpan(
-            text: member.name,
-            style: const TextStyle(
-              fontSize: 10,
-            ),
-          ),
-          textDirection: TextDirection.ltr,
-        );
-        textPainter.layout();
-        textPainter.paint(canvas, offset + const Offset(6, -12));
-      }
-    }
   }
 
   // calculate the relative offset of a members location on the radar
@@ -213,7 +443,7 @@ class RadarPainter extends CustomPainter {
 
   // repaint when location changes
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+  bool shouldRepaint(CustomPainter oldDelegate) {
     return true;
   }
 }
