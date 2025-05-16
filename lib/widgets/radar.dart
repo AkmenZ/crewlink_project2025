@@ -197,12 +197,6 @@ class _RadarState extends ConsumerState<Radar> {
               child: Text('There is no active event at the moment!'));
         }
 
-        // initialize members list once to prevent from rebuilding
-        if (!_isMembersInitialized) {
-          _assignMembers(members);
-          _isMembersInitialized = true;
-        }
-
         // find current user in the list of members
         final userMember = members.firstWhere(
           (member) => member.userId == widget.userId,
@@ -212,6 +206,12 @@ class _RadarState extends ConsumerState<Radar> {
         // members list without the current user
         final filteredMembers =
             members.where((member) => member.userId != widget.userId).toList();
+
+        // initialize members list once to prevent from rebuilding
+        if (!_isMembersInitialized) {
+          _assignMembers(filteredMembers);
+          _isMembersInitialized = true;
+        }
 
         return locationAsyncValue.when(
           data: (locationData) {
