@@ -24,6 +24,13 @@ Stream<LocationData> locationStream(Ref ref) async* {
     if (permissionGranted != PermissionStatus.granted) return;
   }
 
+  // configure accuracy
+  location.changeSettings(
+    accuracy: LocationAccuracy.high, // highest accuracy
+    interval: 1000,// every second
+    distanceFilter: 0.2, // short value here
+  );
+
   // start listening to changes
   yield* location.onLocationChanged;
 }

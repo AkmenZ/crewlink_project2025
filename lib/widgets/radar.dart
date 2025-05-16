@@ -236,6 +236,7 @@ class _RadarState extends ConsumerState<Radar> {
                       backgroundColor: Theme.of(context).colorScheme.surface,
                       heading: _heading,
                       memberColors: _memberColors,
+                      precision: 5.0,
                     ),
                   ),
                 ),
@@ -338,9 +339,35 @@ class RadarPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3;
 
-    // draws 4 circles
     for (int i = 1; i <= 4; i++) {
-      canvas.drawCircle(center, radius * (i / 4), radarPaint);
+      // draws 4 circles
+      final circleRadius = radius * (i / 4);
+      canvas.drawCircle(center, circleRadius, radarPaint);
+
+      // offset text position
+      final textOffset = Offset(center.dx, center.dy - circleRadius - 10);
+
+      // deistance text
+      final distanceText = "${i * precision}m";
+
+      // drawing distance texts
+      final textSpan = TextSpan(
+        text: distanceText,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+      final textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+      textPainter.paint(
+        canvas,
+        textOffset - Offset(textPainter.width / 2, 0), // alligh centered
+      );
     }
 
     // drawing cross lines
@@ -423,7 +450,7 @@ class RadarPainter extends CustomPainter {
     final distance = earthRadius * c;
 
     // if member is outside the range return null
-    if (distance > 300) return null;
+    if (distance > 40) return null;
 
     // calculate the angle relative to the user location
     final angle = atan2(
