@@ -14,7 +14,7 @@ class RadarPage extends ConsumerWidget {
 
     return GradientScaffold(
       appBar: AppBar(
-        title: const Text('Radar'),
+        title: const Text('Friends Radar'),
         backgroundColor: Colors.transparent,
       ),
       body: Center(
