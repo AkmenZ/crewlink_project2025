@@ -1,0 +1,35 @@
+name: Feature Branch Workflow
+# this workflow will not run on pushe to main branch
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # checkout
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # set up Flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.2'
+          channel: 'stable'
+      
+      # install dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # # lint with dart analyzer
+      - name: Analyze code
+        run: flutter analyze
+
+      # runs tests
+      - name: Run tests
+        run: flutter test

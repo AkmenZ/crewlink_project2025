@@ -1,25 +1,32 @@
-name: Flutter Build
+name: Main Workflow
+# this is main workflow that will run on push and pr's to main branch
 
 on:
   push:
-    branches: [ main, master ]
+    branches:
+      - main
+
   pull_request:
-    branches: [ main, master ]
+    branches:
+      - main
 
 jobs:
-  build:
+  build-and-distribute:
     runs-on: ubuntu-latest
-    
+
     steps:
+      # checkout
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
+        # set up Flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.29.2'
           channel: 'stable'
-      
+
+      # create .env file with Firebase secrets
       - name: Create .env file
         run: |
           echo "FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}" > .env
@@ -28,16 +35,24 @@ jobs:
           echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env
           echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env
           echo "FIREBASE_IOS_BUNDLE_ID=${{ secrets.FIREBASE_IOS_BUNDLE_ID }}" >> .env
-      
+
+        # install dependencies
       - name: Install dependencies
         run: flutter pub get
-      
+
+        # lint with dart analyzer
       - name: Analyze code
         run: flutter analyze
-      
+
+        # runs tests
+      - name: Run tests
+        run: flutter test
+
+        # build release apk
       - name: Build APK
         run: flutter build apk --release
 
+        # upload to firebase app distribution
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
