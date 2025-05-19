@@ -6,6 +6,7 @@ import 'package:crewlink/models/event_group_member.dart';
 import 'package:crewlink/providers/event_group_provider.dart';
 import 'package:crewlink/providers/location_provider.dart';
 import 'package:crewlink/services/event_group_service.dart';
+import 'package:crewlink/utils/location_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -80,25 +81,6 @@ class _RadarState extends ConsumerState<Radar> {
     }
   }
 
-  // logic that decides if location should be updated
-  bool _shouldUpdateLocation(GeoPoint currentLocation) {
-    // if last locationn is null, update
-    if (_lastUpdatedLocation == null) {
-      return true;
-    }
-
-    // call the method to calculate distance
-    final distance = _calculateDistance(
-      _lastUpdatedLocation!.latitude,
-      _lastUpdatedLocation!.longitude,
-      currentLocation.latitude,
-      currentLocation.longitude,
-    );
-
-    // check if distance is more than 2 meters
-    return distance > 2;
-  }
-
   /// updates the members location
   Future<void> _updateMemberLocation(String groupId, GeoPoint location) async {
     try {
@@ -110,34 +92,6 @@ class _RadarState extends ConsumerState<Radar> {
     } catch (error) {
       throw Exception('Failed to update location: $error');
     }
-  }
-
-  // calculate the meter distance between two points
-  // haversine formula
-  // https://www.movable-type.co.uk/scripts/latlong.html
-  double _calculateDistance(
-    double lat1,
-    double lon1,
-    double lat2,
-    double lon2,
-  ) {
-    const earthRadius = 6371000; // earths raduis
-    final dLat = _degreesToRadians(lat2 - lat1);
-    final dLon = _degreesToRadians(lon2 - lon1);
-
-    final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_degreesToRadians(lat1)) *
-            cos(_degreesToRadians(lat2)) *
-            sin(dLon / 2) *
-            sin(dLon / 2);
-
-    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    return earthRadius * c;
-  }
-
-  // converts degrees to radians
-  double _degreesToRadians(double degrees) {
-    return degrees * pi / 180;
   }
 
   // start the timer to update location every 2 seconds
@@ -167,7 +121,7 @@ class _RadarState extends ConsumerState<Radar> {
 
           if (groupId != null) {
             // check if should be updated
-            if (_shouldUpdateLocation(currentLocation)) {
+            if (shouldUpdateLocation(currentLocation, _lastUpdatedLocation)) {
               // update member location
               _updateMemberLocation(groupId, currentLocation);
               // update last location
