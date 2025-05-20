@@ -77,5 +77,5 @@ jobs:
         with:
           name: 'APP_VERSION'
           value: ${{ env.CURRENT_VERSION }}
-          repository: AkmenZ/your-repo-name
+          repository: AkmenZ/crewlink_project2025
           token: ${{ secrets.GITHUB_TOKEN }}
