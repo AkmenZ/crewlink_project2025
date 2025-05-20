@@ -26,6 +26,16 @@ jobs:
           flutter-version: '3.29.2'
           channel: 'stable'
 
+      # Set new version of app
+      - name: Set new version of app
+        env:
+          CURRENT_VERSION: ${{ secrets.APP_VERSION }}
+        run: |
+          CURRENT_VERSION=$((CURRENT_VERSION + 1))
+          CODE_VERSION=$((CURRENT_VERSION + 1))
+          sed -i "/version:/c version: 1.0.$CURRENT_VERSION+$CODE_VERSION" pubspec.yaml
+          echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+
       # create .env file with Firebase secrets
       - name: Create .env file
         run: |
@@ -60,3 +70,12 @@ jobs:
           token: ${{ secrets.FIREBASE_AUTH_TOKEN }}
           groups: "testers"
           file: build/app/outputs/flutter-apk/app-release.apk
+
+      # Update GitHub repo secret for future app builds
+      - name: Update GitHub repo secret for future app builds
+        uses: hmanzur/actions-set-secret@v2.0.0
+        with:
+          name: 'APP_VERSION'
+          value: ${{ env.CURRENT_VERSION }}
+          repository: AkmenZ/your-repo-name
+          token: ${{ secrets.GITHUB_TOKEN }}
