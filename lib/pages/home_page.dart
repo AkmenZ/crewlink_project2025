@@ -207,7 +207,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           spacing: 10.0,
           children: [
             Text(
-              'Popular this summer',
+              'Popular events this summer',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             SizedBox(
