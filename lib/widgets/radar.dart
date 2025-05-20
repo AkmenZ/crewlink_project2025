@@ -144,7 +144,9 @@ class _RadarState extends ConsumerState<Radar> {
     return membersStream.when(
       data: (data) {
         final groupId = data['groupId'];
-        final members = data['members'] as List<EventGroupMember>;
+        final members = (data['members'] as List<dynamic>)
+            .map((e) => e as EventGroupMember)
+            .toList();
 
         if (groupId == null || members.isEmpty) {
           return const Center(

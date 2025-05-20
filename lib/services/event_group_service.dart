@@ -206,12 +206,12 @@ class EventGroupService {
           .doc(activeGroupId)
           .collection('members')
           .snapshots()
-          .map((snapshot) => {
-                'groupId': activeGroupId,
-                'members': snapshot.docs
-                    .map((doc) => EventGroupMember.fromFirestore(doc))
-                    .toList(),
-              });
+          .map((snapshot) {
+        final members = snapshot.docs
+            .map((doc) => EventGroupMember.fromFirestore(doc))
+            .toList();
+        return {'groupId': activeGroupId, 'members': members};
+      });
     } catch (e) {
       yield {'groupId': null, 'members': []};
     }
