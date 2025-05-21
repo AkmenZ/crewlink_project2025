@@ -153,6 +153,8 @@ class _RadarState extends ConsumerState<Radar> {
               child: Text('There is no active event at the moment!'));
         }
 
+        final eventAsyncValue = ref.watch(getEventGroupByIdProvider(groupId));
+
         // find current user in the list of members
         final userMember = members.firstWhere(
           (member) => member.userId == widget.userId,
@@ -171,11 +173,17 @@ class _RadarState extends ConsumerState<Radar> {
 
         return locationAsyncValue.when(
           data: (locationData) {
-            final lat = locationData.latitude?.toStringAsFixed(6) ?? 'Unknown';
-            final lon = locationData.longitude?.toStringAsFixed(6) ?? 'Unknown';
-
             return Column(
+              spacing: 20.0,
               children: [
+                // event title
+                Text(
+                  eventAsyncValue.maybeWhen(
+                    data: (eventGroup) => eventGroup?.title ?? '',
+                    orElse: () => '',
+                  ),
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
                 // radar section
                 SizedBox(
                   height: 300,
@@ -196,15 +204,10 @@ class _RadarState extends ConsumerState<Radar> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                // user location
                 Text(
-                  'My Location',
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
+                  'Members List',
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                Text('Lat: $lat, Lon: $lon'),
-                const SizedBox(height: 20),
                 // list of member names
                 Expanded(
                   child: members.isEmpty
@@ -414,7 +417,7 @@ class RadarPainter extends CustomPainter {
       memberLocation.longitude - userLocation.longitude,
     );
 
-    // map the distance to the radius
+    // scales the distance to fit within the radar
     final scaledDistance = (distance / precision) * (radarRadius / 6);
 
     // calculate the member position on the radar
