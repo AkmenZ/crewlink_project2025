@@ -200,7 +200,7 @@ class _RadarState extends ConsumerState<Radar> {
                       backgroundColor: Theme.of(context).colorScheme.surface,
                       heading: _heading,
                       memberColors: _memberColors,
-                      precision: 5.0,
+                      precision: 10.0,
                     ),
                   ),
                 ),
@@ -349,11 +349,12 @@ class RadarPainter extends CustomPainter {
     // drawing member dots
     final memberDotOffsets = <Offset, String>{};
     for (final member in members) {
-      final offset = _calculateRelativeOffset(
+      final offset = calculateRelativeOffset(
         userLocation,
         member.location,
         center,
         radius,
+        precision,
       );
 
       if (offset != null) {
@@ -383,48 +384,6 @@ class RadarPainter extends CustomPainter {
     path.close(); // close path
 
     canvas.drawPath(path, trianglePaint);
-  }
-
-  // calculate the relative offset of a members location on the radar
-  Offset? _calculateRelativeOffset(
-    GeoPoint userLocation,
-    GeoPoint memberLocation,
-    Offset center,
-    double radarRadius,
-  ) {
-    const earthRadius = 6371000; // earths radius meters
-
-    // convert latitude and longitude from degrees to radians
-    final userLat = userLocation.latitude * pi / 180;
-    final userLon = userLocation.longitude * pi / 180;
-    final memberLat = memberLocation.latitude * pi / 180;
-    final memberLon = memberLocation.longitude * pi / 180;
-
-    // calculate the distance between the two points
-    final dLat = memberLat - userLat;
-    final dLon = memberLon - userLon;
-    final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(userLat) * cos(memberLat) * sin(dLon / 2) * sin(dLon / 2);
-    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    final distance = earthRadius * c;
-
-    // if member is outside the range return null
-    if (distance > 40) return null;
-
-    // calculate the angle relative to the user location
-    final angle = atan2(
-      memberLocation.latitude - userLocation.latitude,
-      memberLocation.longitude - userLocation.longitude,
-    );
-
-    // scales the distance to fit within the radar
-    final scaledDistance = (distance / precision) * (radarRadius / 6);
-
-    // calculate the member position on the radar
-    final dx = scaledDistance * cos(angle);
-    final dy = scaledDistance * sin(angle);
-
-    return center + Offset(dx, dy);
   }
 
   // repaint when location changes
